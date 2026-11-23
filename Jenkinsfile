@@ -2,37 +2,34 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
-                checkout scm
+                bat 'dotnet build SignalRSample.sln -c Release'
             }
         }
 
-        stage('Restore & Build') {
+        stage('Test') {
             steps {
-                bat 'dotnet build SignalRSample.sln --configuration Release'
+                bat 'dotnet test SignalRSample.Tests\\SignalRSample.Tests.csproj -c Release --no-build'
             }
         }
 
-        stage('Run NUnit Tests') {
+        stage('Stop App') {
             steps {
-                bat 'dotnet test SignalRSample.sln --configuration Release --no-build --logger "console;verbosity=normal"'
+                bat 'powershell -Command "Stop-Service -Name SignalRSampleService -ErrorAction SilentlyContinue"'
             }
         }
 
-        stage('Publish (Deploy)') {
+        stage('Deploy') {
             steps {
-                bat 'dotnet publish SignalRSample/SignalRSample.csproj --configuration Release --no-build --output C:\\Deploy\\SignalRSample'
+                bat 'dotnet publish SignalRSample\\SignalRSample.csproj -c Release -o C:\\Deploy\\SignalRSample --no-build'
             }
         }
-    }
 
-    post {
-        success {
-            echo 'Build, 27 NUnit tests, and deployment to C:\\Deploy\\SignalRSample succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed. Check the Console Output logs.'
+        stage('Start App') {
+            steps {
+                bat 'powershell -Command "Start-Service -Name SignalRSampleService"'
+            }
         }
     }
 }
