@@ -10,7 +10,12 @@ pipeline {
 
         stage('Test') {
             steps {
-                bat 'dotnet test SignalRSample.Tests\\SignalRSample.Tests.csproj -c Release --no-build'
+                bat 'dotnet test SignalRSample.Tests\\SignalRSample.Tests.csproj -c Release --no-build --logger "nunit;LogFilePath=TestResults\\nunit-results.xml"'
+            }
+            post {
+                always {
+                    nunit testResultsPattern: '**/TestResults/nunit-results.xml'
+                }
             }
         }
 
