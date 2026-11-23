@@ -36,5 +36,13 @@ pipeline {
                 bat 'powershell -Command "Start-Service -Name SignalRSampleService"'
             }
         }
+
+        stage('Docker Build & Run') {
+            steps {
+                bat 'docker build -t signalrsample:latest .'
+                bat 'docker rm -f signalrsample-container || exit /b 0'
+                bat 'docker run -d --name signalrsample-container -p 5050:80 signalrsample:latest'
+            }
+        }
     }
 }
