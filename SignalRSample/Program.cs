@@ -34,6 +34,7 @@ else
     app.UseHsts();
 }
 
+// HTTPS redirection 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
